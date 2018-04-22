@@ -14,6 +14,8 @@ std::string query_stream_info_message(
     const std::string& username,
     const std::string& password);
 
+const char* get_discovery_message();
+
 }
 
 #endif  // CAM_FINDER_REQUEST_MESSAGES_H_

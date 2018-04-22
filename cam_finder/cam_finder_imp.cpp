@@ -5,27 +5,7 @@
 #include <string>
 
 #include "cam_finder/cam_finder_imp.h"
-
-
-#define XML_DISCOVERY  \
-    "<?xml version=\"1.0\" ?>\n"  \
-    "<s:Envelope xmlns:a=\"http://schemas.xmlsoap.org/ws/2004/08/addressing\"" \
-        " xmlns:d=\"http://schemas.xmlsoap.org/ws/2005/04/discovery\"" \
-        " xmlns:s=\"http://www.w3.org/2003/05/soap-envelope\">\n" \
-    "        <s:Header>\n" \
-    "            <a:Action>" \
-                  "http://schemas.xmlsoap.org/ws/2005/04/discovery/Probe" \
-                "</a:Action>\n" \
-    "                <a:MessageID>" \
-      "urn:uuid:2b0bf1e1-d725-49a9-834a-52656c4b5011</a:MessageID>\n" \
-    "                <a:To>" \
-      "urn:schemas-xmlsoap-org:ws:2005:04:discovery</a:To>\n" \
-    "        </s:Header>\n" \
-    "        <s:Body>\n" \
-    "                <d:Probe/>\n" \
-    "        </s:Body>\n" \
-    "</s:Envelope>\n"
-
+#include "cam_finder/request_messages.h"
 
 namespace camfinder {
 
@@ -84,8 +64,10 @@ void CamFinderImp::find_cameras() {
     auto endpoint = boost::asio::ip::udp::endpoint(
         v4_multi_address, port_);
 
+    const char* discovery_message = get_discovery_message();
+
     socket->async_send_to(boost::asio::buffer(
-            XML_DISCOVERY, strlen(XML_DISCOVERY) + 1), endpoint,
+            discovery_message, strlen(discovery_message) + 1), endpoint,
                 [socket] (
                     const boost::system::error_code& error,
                     std::size_t transferred) {
@@ -106,7 +88,7 @@ void CamFinderImp::start() {
     work_.reset(new boost::asio::io_service::work(io_service_));
     thread_.reset(new boost::thread([this]() {
         io_service_.reset();
-        start_receive();
+        start_discovery();
         io_service_.run();
     }));
 }
@@ -119,7 +101,7 @@ void CamFinderImp::stop() {
     }
 }
 
-void CamFinderImp::start_receive() {
+void CamFinderImp::start_discovery() {
     auto v4_listen_address = boost::asio::ip::address_v4::from_string(
             listen_address_.c_str());
 
@@ -150,10 +132,10 @@ void CamFinderImp::start_receive() {
 
     std::shared_ptr<array_2k> buffer(new array_2k());
 
-    receive(socket, buffer);
+    receive_discovery(socket, buffer);
 }
 
-void CamFinderImp::receive(
+void CamFinderImp::receive_discovery(
     std::shared_ptr<boost::asio::ip::udp::socket> socket,
     std::shared_ptr<array_2k> buffer
 ) {
@@ -171,7 +153,7 @@ void CamFinderImp::receive(
                 auto data = std::string(
                     buffer->begin(), buffer->begin() + transferred);
 
-                receive(socket, buffer);
+                receive_discovery(socket, buffer);
 
                 std::size_t tag_start = data.find("<d:XAddrs>");
 
@@ -185,10 +167,23 @@ void CamFinderImp::receive(
                     return;
                 }
 
-                handler_(data.substr(tag_start + 10, tag_end - tag_start - 10),
-                        stream_list_t(), 0);
+                query_device(
+                    data.substr(tag_start + 10, tag_end - tag_start - 10),
+                    "", "");
             }
         });
+}
+
+
+void CamFinderImp::query_device(
+                const std::string& device_url,
+                const std::string& username,
+                const std::string& password
+) {
+    handler_(device_url, stream_list_t(), 0);
+    // TODO(Rodrigo): query camip profiles
+    // TODO(Rodrigo): for each profile query camip video stream uris
+    // TODO(Rodrigo): notify discovered information
 }
 
 }  // namespace camfinder

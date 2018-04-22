@@ -25,12 +25,17 @@ class CamFinderImp: public CamFinder, public boost::noncopyable {
         ReceiverHandler handler);
     ~CamFinderImp();
     void find_cameras() override;
+    void query_device(
+            const std::string& device_url,
+            const std::string& username,
+            const std::string& password) override;
+
     void start() override;
     void stop() override;
 
  private:
-    void start_receive();
-    void receive(
+    void start_discovery();
+    void receive_discovery(
         std::shared_ptr<boost::asio::ip::udp::socket> socket,
         std::shared_ptr<array_2k> buffer);
 

@@ -25,6 +25,10 @@ class CamFinder {
  public:
     virtual ~CamFinder();
     virtual void find_cameras() = 0;
+    virtual void query_device(
+                const std::string& device_url,
+                const std::string& username,
+                const std::string& password) = 0;
     virtual void start() = 0;
     virtual void stop() = 0;
 };

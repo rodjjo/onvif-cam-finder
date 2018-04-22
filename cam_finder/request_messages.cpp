@@ -200,6 +200,7 @@ std::string sha1_of_string(const std::string& data) {
 }
 
 std::string create_nonce() {
+    // auto uuid = boost::uuids::random_generator()();
     printf("base644 of admin = %s", encode_base64("admin", 5).c_str());
     return "noncecreated";
 }
@@ -213,7 +214,7 @@ void generate_token(
     token_t &token = *ptoken;
     token.username = xml_encode(username);
     token.created = utc_date();
-    // auto uuid = boost::uuids::random_generator()();
+
     std::string nonce = create_nonce();
 
     token.nonce = encode_base64(&nonce[0], nonce.size());
@@ -259,6 +260,26 @@ std::string query_stream_info_message(
         token.username, token.password, token.nonce, token.created);
 
     return data.str();
+}
+
+const char* get_discovery_message() {
+    return "<?xml version=\"1.0\" ?>\n"  \
+    "<s:Envelope xmlns:a=\"http://schemas.xmlsoap.org/ws/2004/08/addressing\"" \
+        " xmlns:d=\"http://schemas.xmlsoap.org/ws/2005/04/discovery\"" \
+        " xmlns:s=\"http://www.w3.org/2003/05/soap-envelope\">\n" \
+    "        <s:Header>\n" \
+    "            <a:Action>" \
+                  "http://schemas.xmlsoap.org/ws/2005/04/discovery/Probe" \
+                "</a:Action>\n" \
+    "                <a:MessageID>" \
+      "urn:uuid:2b0bf1e1-d725-49a9-834a-52656c4b5011</a:MessageID>\n" \
+    "                <a:To>" \
+      "urn:schemas-xmlsoap-org:ws:2005:04:discovery</a:To>\n" \
+    "        </s:Header>\n" \
+    "        <s:Body>\n" \
+    "                <d:Probe/>\n" \
+    "        </s:Body>\n" \
+    "</s:Envelope>\n";
 }
 
 }  // namespace camfinder
