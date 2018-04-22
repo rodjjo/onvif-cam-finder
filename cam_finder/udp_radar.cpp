@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2018 by Rodrigo Antonio de Araujo
  */
-#include "cam_finder/camfinder/udpradar.h"
+#include "cam_finder/camfinder/camfinder.h"
 #include "cam_finder/udp_radar_imp.h"
 
 namespace udpradar {

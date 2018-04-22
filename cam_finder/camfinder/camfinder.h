@@ -1,8 +1,8 @@
 /*
  * Copyright (C) 2018 by Rodrigo Antonio de Araujo
  */
-#ifndef UDP_RADAR_UDPRADAR_UDPRADAR_H_
-#define UDP_RADAR_UDPRADAR_UDPRADAR_H_
+#ifndef CAM_FINDER_CAMFINDER_CAMFINDER_H_
+#define CAM_FINDER_CAMFINDER_CAMFINDER_H_
 
 #include <memory>
 #include <functional>
@@ -46,4 +46,4 @@ std::string query_stream_info_message(
 
 }  // namespace udpradar
 
-#endif  // UDP_RADAR_UDPRADAR_UDPRADAR_H_
+#endif  // CAM_FINDER_CAMFINDER_CAMFINDER_H_
