@@ -13,7 +13,7 @@
 #include <boost/archive/iterators/transform_width.hpp>
 #include <boost/archive/iterators/ostream_iterator.hpp>
 
-#include "cam_finder/udp_info_message.h"
+#include "cam_finder/request_messages.h"
 
 
 #define XML_DEVICES \

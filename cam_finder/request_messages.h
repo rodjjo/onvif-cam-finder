@@ -1,8 +1,8 @@
 /*
  * Copyright (C) 2018 by Rodrigo Antonio de Araujo
  */
-#ifndef UDP_RADAR_UDP_INFO_MESSAGE_H_
-#define UDP_RADAR_UDP_INFO_MESSAGE_H_
+#ifndef CAM_FINDER_REQUEST_MESSAGES_H_
+#define CAM_FINDER_REQUEST_MESSAGES_H_
 
 #include <string>
 
@@ -16,4 +16,4 @@ std::string query_stream_info_message(
 
 }
 
-#endif  // UDP_RADAR_UDP_INFO_MESSAGE_H_
+#endif  // CAM_FINDER_REQUEST_MESSAGES_H_
