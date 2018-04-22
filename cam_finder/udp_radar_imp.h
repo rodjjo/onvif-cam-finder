@@ -9,7 +9,7 @@
 #include <boost/asio.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/thread.hpp>
-#include "udp_radar/camfinder/udpradar.h"
+#include "cam_finder/camfinder/udpradar.h"
 
 
 namespace udpradar {
