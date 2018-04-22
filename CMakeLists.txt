@@ -26,6 +26,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/build/bin)
 set(PLATFORM_SPECIFIC_LIBS "-lpthread")
 
 add_subdirectory("cam_finder")
-add_subdirectory("radar_tool")
+add_subdirectory("cam_tool")
 
 
