@@ -5,7 +5,7 @@
 #include <string>
 #include <boost/thread.hpp>
 #include <boost/date_time.hpp>
-#include "udp_radar/udpradar/udpradar.h"
+#include "udp_radar/camfinder/udpradar.h"
 
 
 int main() {

@@ -1,6 +1,5 @@
 file(GLOB Sources "*.cpp")
-file(GLOB Testing "test/*.cpp" "test/mocks/*.cpp")
-set(udpradar_HEADERS "udpradar/udpradar.h")
+set(udpradar_HEADERS "camfinder/udpradar.h")
 
 add_library(udp-radar STATIC ${Sources})
 
