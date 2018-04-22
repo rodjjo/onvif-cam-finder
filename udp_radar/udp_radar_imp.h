@@ -14,7 +14,7 @@
 
 namespace udpradar {
 
-typedef std::array<char, 65000> array_2k;
+typedef std::array<char, 2048> array_2k;
 
 class UdpRadarImp: public UdpRadar, public boost::noncopyable {
  public:
