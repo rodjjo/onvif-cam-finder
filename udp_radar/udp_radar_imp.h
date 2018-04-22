@@ -16,15 +16,15 @@ namespace udpradar {
 
 typedef std::array<char, 2048> array_2k;
 
-class UdpRadarImp: public UdpRadar, public boost::noncopyable {
+class CamFinderImp: public CamFinder, public boost::noncopyable {
  public:
-    UdpRadarImp(
+    CamFinderImp(
         const char *listen_address,
         const char *multicast_address,
         unsigned int port,
         ReceiverHandler handler);
-    ~UdpRadarImp();
-    void ws_discovery() override;
+    ~CamFinderImp();
+    void find_cameras() override;
     void start() override;
     void stop() override;
 

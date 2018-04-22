@@ -7,26 +7,31 @@
 #include <memory>
 #include <functional>
 #include <string>
+#include <list>
 #include <boost/noncopyable.hpp>
 
 
 namespace udpradar {
 
 
+typedef std::list<std::string> stream_list_t;
+
 typedef std::function<void(
-    const std::string& device, int error_code)> ReceiverHandler;
+    const std::string& device,
+    const stream_list_t& streams,
+    int error_code)> ReceiverHandler;
 
 
-class UdpRadar {
+class CamFinder {
  public:
-    virtual ~UdpRadar();
-    virtual void ws_discovery() = 0;
+    virtual ~CamFinder();
+    virtual void find_cameras() = 0;
     virtual void start() = 0;
     virtual void stop() = 0;
 };
 
 
-std::shared_ptr<UdpRadar> build(
+std::shared_ptr<CamFinder> build(
     const char *listen_address,
     const char *multicast_address,
     unsigned int port,

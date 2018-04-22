@@ -16,7 +16,9 @@ int main() {
 
     auto radar = udpradar::build(
             "0.0.0.0", "239.255.255.250", 3702, [&finished] (
-                const std::string& device, int error) {
+                const std::string& device,
+                const udpradar::stream_list_t&,
+                int) {
                     printf("Device: %s\n", device.c_str());
                     finished = true;
                 });
@@ -27,7 +29,7 @@ int main() {
     boost::this_thread::sleep(boost::posix_time::milliseconds(2000));
 
     printf("Sending...\n");
-    radar->ws_discovery();
+    radar->find_cameras();
     printf("Waiting reception...\n");
 
     while (!finished) {

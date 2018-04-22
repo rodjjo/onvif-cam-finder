@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.5.0 FATAL_ERROR)
 
 set(CMAKE_CXX_STANDARD 14)
 
-project(UdpRadar C CXX)
+project(CamFinder C CXX)
 
 find_package(Threads)
 find_package(OpenSSL)
@@ -17,7 +17,7 @@ find_package(Boost
 
 find_package(PkgConfig REQUIRED)
 
-include_directories(UdpRadar ${PROJECT_SOURCE_DIR})
+include_directories(CamFinder ${PROJECT_SOURCE_DIR})
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/build/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/build/lib)

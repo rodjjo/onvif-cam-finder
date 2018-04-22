@@ -30,7 +30,7 @@
 
 namespace udpradar {
 
-UdpRadarImp::UdpRadarImp(
+CamFinderImp::CamFinderImp(
     const char *listen_address,
     const char *multicast_address,
     unsigned int port,
@@ -41,11 +41,11 @@ UdpRadarImp::UdpRadarImp(
    handler_(handler) {
 }
 
-UdpRadarImp::~UdpRadarImp() {
+CamFinderImp::~CamFinderImp() {
     stop();
 }
 
-void UdpRadarImp::ws_discovery() {
+void CamFinderImp::find_cameras() {
     if (!thread_) {
         return;
     }
@@ -81,11 +81,6 @@ void UdpRadarImp::ws_discovery() {
         boost::asio::ip::udp::v4(), port_);
 
     socket->bind(listen_endpoint);
-/*
-    socket->set_option(
-        boost::asio::ip::multicast::join_group(
-            v4_multi_address));
-    */
 
     auto endpoint = boost::asio::ip::udp::endpoint(
         v4_multi_address, port_);
@@ -105,7 +100,7 @@ void UdpRadarImp::ws_discovery() {
     io_service.run_one();
 }
 
-void UdpRadarImp::start() {
+void CamFinderImp::start() {
     if (thread_) {
         return;
     }
@@ -117,7 +112,7 @@ void UdpRadarImp::start() {
     }));
 }
 
-void UdpRadarImp::stop() {
+void CamFinderImp::stop() {
     if (thread_) {
         work_.reset();
         thread_->join();
@@ -125,7 +120,7 @@ void UdpRadarImp::stop() {
     }
 }
 
-void UdpRadarImp::start_receive() {
+void CamFinderImp::start_receive() {
     auto v4_listen_address = boost::asio::ip::address_v4::from_string(
             listen_address_.c_str());
 
@@ -142,7 +137,7 @@ void UdpRadarImp::start_receive() {
     socket->open(listen_endpoint.protocol(), error);
 
     if (error) {
-        handler_(std::string(), error.value());
+        handler_(std::string(), stream_list_t(), error.value());
     }
 
     socket->set_option(
@@ -159,7 +154,7 @@ void UdpRadarImp::start_receive() {
     receive(socket, buffer);
 }
 
-void UdpRadarImp::receive(
+void CamFinderImp::receive(
     std::shared_ptr<boost::asio::ip::udp::socket> socket,
     std::shared_ptr<array_2k> buffer
 ) {
@@ -172,12 +167,11 @@ void UdpRadarImp::receive(
             this, remote_endpoint, socket, buffer
         ] (const boost::system::error_code& error, std::size_t transferred) {
             if (error) {
-                handler_(std::string(), error.value());
+                handler_(std::string(), stream_list_t(), error.value());
             } else {
                 auto data = std::string(
                     buffer->begin(), buffer->begin() + transferred);
 
-                // once buffer is not referenced receive next information
                 receive(socket, buffer);
 
                 std::size_t tag_start = data.find("<d:XAddrs>");
@@ -192,8 +186,8 @@ void UdpRadarImp::receive(
                     return;
                 }
 
-                handler_(
-                    data.substr(tag_start + 10, tag_end - tag_start - 10), 0);
+                handler_(data.substr(tag_start + 10, tag_end - tag_start - 10),
+                        stream_list_t(), 0);
             }
         });
 }
