@@ -14,7 +14,7 @@ int main() {
     return 0;
     bool finished = false;
 
-    auto radar = camfinder::build(
+    auto finder = camfinder::build(
             "0.0.0.0", "239.255.255.250", 3702, [&finished] (
                 const std::string& device,
                 const camfinder::stream_list_t&,
@@ -24,12 +24,12 @@ int main() {
                 });
 
     printf("Starting...\n");
-    radar->start();
+    finder->start();
 
     boost::this_thread::sleep(boost::posix_time::milliseconds(2000));
 
     printf("Sending...\n");
-    radar->find_cameras();
+    finder->find_cameras();
     printf("Waiting reception...\n");
 
     while (!finished) {
