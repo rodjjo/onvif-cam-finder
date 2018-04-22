@@ -112,7 +112,6 @@ void UdpRadarImp::start() {
     work_.reset(new boost::asio::io_service::work(io_service_));
     thread_.reset(new boost::thread([this]() {
         io_service_.reset();
-        printf("Receiving thread...\n");
         start_receive();
         io_service_.run();
     }));
@@ -127,8 +126,6 @@ void UdpRadarImp::stop() {
 }
 
 void UdpRadarImp::start_receive() {
-    printf("Query reception 0...\n");
-
     auto v4_listen_address = boost::asio::ip::address_v4::from_string(
             listen_address_.c_str());
 
@@ -141,7 +138,12 @@ void UdpRadarImp::start_receive() {
     std::shared_ptr<boost::asio::ip::udp::socket> socket(
         new boost::asio::ip::udp::socket(io_service_));
 
-    socket->open(listen_endpoint.protocol());
+    boost::system::error_code error;
+    socket->open(listen_endpoint.protocol(), error);
+
+    if (error) {
+        handler_(std::string(), error.value());
+    }
 
     socket->set_option(
         boost::asio::ip::udp::socket::reuse_address(true));
@@ -154,7 +156,6 @@ void UdpRadarImp::start_receive() {
 
     std::shared_ptr<array_2k> buffer(new array_2k());
 
-    printf("Query reception... 2\n");
     receive(socket, buffer);
 }
 
@@ -171,7 +172,6 @@ void UdpRadarImp::receive(
             this, remote_endpoint, socket, buffer
         ] (const boost::system::error_code& error, std::size_t transferred) {
             if (error) {
-                printf("A error here %d\n", error.value());
                 handler_(std::string(), error.value());
             } else {
                 auto data = std::string(
@@ -179,9 +179,6 @@ void UdpRadarImp::receive(
 
                 // once buffer is not referenced receive next information
                 receive(socket, buffer);
-
-                // printf("Some action here: %s\n", data.c_str());
-                printf("Some action here: %s\n", remote_endpoint->address().to_string().c_str());
 
                 std::size_t tag_start = data.find("<d:XAddrs>");
 

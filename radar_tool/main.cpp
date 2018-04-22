@@ -9,6 +9,9 @@
 
 
 int main() {
+    printf("%s\n", udpradar::query_stream_info_message
+        ("", "", "admin", "admin").c_str());
+    return 0;
     bool finished = false;
 
     auto radar = udpradar::build(

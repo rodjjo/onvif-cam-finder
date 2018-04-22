@@ -33,6 +33,12 @@ std::shared_ptr<UdpRadar> build(
     ReceiverHandler handler);
 
 
+std::string query_stream_info_message(
+    const std::string& host,
+    const std::string& path,
+    const std::string& username,
+    const std::string& password);
+
 }  // namespace udpradar
 
 #endif  // UDP_RADAR_UDPRADAR_UDPRADAR_H_
