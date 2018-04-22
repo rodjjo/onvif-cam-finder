@@ -1,10 +1,10 @@
 file(GLOB Sources "*.cpp")
 
-add_executable(radar-tool ${Sources})
+add_executable(cam-tool ${Sources})
 
-target_include_directories (radar-tool PUBLIC ${PROJECT_SOURCE_DIR}/udp_radar)
+target_include_directories (cam-tool PUBLIC ${PROJECT_SOURCE_DIR}/cam_finder)
 
-target_link_libraries(radar-tool
+target_link_libraries(cam-tool
                       udp-radar
                       ${Boost_FILESYSTEM_LIBRARY}
                       ${Boost_SYSTEM_LIBRARY}
@@ -12,4 +12,4 @@ target_link_libraries(radar-tool
                       ${OPENSSL_LIBRARIES}
                       ${CMAKE_THREAD_LIBS_INIT})
 
-SET_TARGET_PROPERTIES(radar-tool PROPERTIES LINKER_LANGUAGE C)
+SET_TARGET_PROPERTIES(cam-tool PROPERTIES LINKER_LANGUAGE C)
