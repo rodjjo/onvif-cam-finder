@@ -1,6 +1,6 @@
-# Async C++ Service Discovery (UDP Radar)
+# Async C++ Onvif CamFinder
 
-## Build and test
+## Build
 
 Install the building tools
 

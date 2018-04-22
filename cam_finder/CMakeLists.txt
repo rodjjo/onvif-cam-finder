@@ -1,5 +1,5 @@
 file(GLOB Sources "*.cpp")
-set(udpradar_HEADERS "camfinder/udpradar.h")
+set(CAMFINDER_HEADERS "camfinder/camfinder.h")
 
 add_library(cam-finder STATIC ${Sources})
 
@@ -10,5 +10,5 @@ install(TARGETS cam-finder
         LIBRARY DESTINATION lib
         COMPONENT library)
 
-install(FILES ${udpradar_HEADERS}
-        DESTINATION include/udpradar)
+install(FILES ${CAMFINDER_HEADERS}
+        DESTINATION include/camfinder)
