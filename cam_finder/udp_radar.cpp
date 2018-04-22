@@ -4,7 +4,7 @@
 #include "cam_finder/camfinder/camfinder.h"
 #include "cam_finder/udp_radar_imp.h"
 
-namespace udpradar {
+namespace camfinder {
 
 CamFinder::~CamFinder() {
 }
@@ -21,4 +21,4 @@ std::shared_ptr<CamFinder> build(
 }
 
 
-}  // namespace udpradar
+}  // namespace camfinder

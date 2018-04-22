@@ -51,7 +51,7 @@
     "    </soap:Body>\n" \
     "</soap:Envelope>\n"
 
-namespace udpradar {
+namespace camfinder {
 
 std::string xml_encode(const std::string& data) {
     std::string buffer;
@@ -261,4 +261,4 @@ std::string query_stream_info_message(
     return data.str();
 }
 
-}  // namespace udpradar
+}  // namespace camfinder

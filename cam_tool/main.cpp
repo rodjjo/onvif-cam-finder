@@ -9,15 +9,15 @@
 
 
 int main() {
-    printf("%s\n", udpradar::query_stream_info_message
+    printf("%s\n", camfinder::query_stream_info_message
         ("", "", "admin", "admin").c_str());
     return 0;
     bool finished = false;
 
-    auto radar = udpradar::build(
+    auto radar = camfinder::build(
             "0.0.0.0", "239.255.255.250", 3702, [&finished] (
                 const std::string& device,
-                const udpradar::stream_list_t&,
+                const camfinder::stream_list_t&,
                 int) {
                     printf("Device: %s\n", device.c_str());
                     finished = true;

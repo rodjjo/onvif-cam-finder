@@ -4,7 +4,7 @@
 #include "cam_finder/udp_radar_utils.h"
 #include <boost/asio.hpp>
 
-namespace udpradar {
+namespace camfinder {
 
 std::list<std::string> get_local_addresses() {
     using boost::asio::ip::tcp;
@@ -23,4 +23,4 @@ std::list<std::string> get_local_addresses() {
     }
 }
 
-}  // namespace udpradar
+}  // namespace camfinder

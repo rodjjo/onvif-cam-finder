@@ -7,10 +7,10 @@
 #include <string>
 #include <list>
 
-namespace udpradar {
+namespace camfinder {
 
 std::list<std::string> get_local_addresses();
 
-}  // namespace udpradar
+}  // namespace camfinder
 
 #endif  // UDP_RADAR_UDP_RADAR_UTILS_H_

@@ -6,7 +6,7 @@
 
 #include <string>
 
-namespace udpradar {
+namespace camfinder {
 
 std::string query_stream_info_message(
     const std::string& host,

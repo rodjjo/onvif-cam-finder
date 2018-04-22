@@ -11,8 +11,7 @@
 #include <boost/noncopyable.hpp>
 
 
-namespace udpradar {
-
+namespace camfinder {
 
 typedef std::list<std::string> stream_list_t;
 
@@ -44,6 +43,6 @@ std::string query_stream_info_message(
     const std::string& username,
     const std::string& password);
 
-}  // namespace udpradar
+}  // namespace camfinder
 
 #endif  // CAM_FINDER_CAMFINDER_CAMFINDER_H_

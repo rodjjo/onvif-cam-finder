@@ -28,7 +28,7 @@
     "</s:Envelope>\n"
 
 
-namespace udpradar {
+namespace camfinder {
 
 CamFinderImp::CamFinderImp(
     const char *listen_address,
@@ -192,4 +192,4 @@ void CamFinderImp::receive(
         });
 }
 
-}  // namespace udpradar
+}  // namespace camfinder

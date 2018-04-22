@@ -12,7 +12,7 @@
 #include "cam_finder/camfinder/camfinder.h"
 
 
-namespace udpradar {
+namespace camfinder {
 
 typedef std::array<char, 2048> array_2k;
 
@@ -45,6 +45,6 @@ class CamFinderImp: public CamFinder, public boost::noncopyable {
 };
 
 
-}  // namespace udpradar
+}  // namespace camfinder
 
 #endif  // UDP_RADAR_UDP_RADAR_IMP_H_
