@@ -3,7 +3,29 @@
  */
 #include <sstream>
 #include <string>
+#include <tinyxml2.h>
+
 #include "udp_radar/udp_radar_imp.h"
+
+
+#define XML_DISCOVERY  \
+    "<?xml version=\"1.0\" ?>\n"  \
+    "<s:Envelope xmlns:a=\"http://schemas.xmlsoap.org/ws/2004/08/addressing\"" \
+        " xmlns:d=\"http://schemas.xmlsoap.org/ws/2005/04/discovery\"" \
+        " xmlns:s=\"http://www.w3.org/2003/05/soap-envelope\">\n" \
+    "        <s:Header>\n" \
+    "            <a:Action>" \
+                  "http://schemas.xmlsoap.org/ws/2005/04/discovery/Probe" \
+                "</a:Action>\n" \
+    "                <a:MessageID>" \
+      "urn:uuid:2b0bf1e1-d725-49a9-834a-52656c4b5011</a:MessageID>\n" \
+    "                <a:To>" \
+      "urn:schemas-xmlsoap-org:ws:2005:04:discovery</a:To>\n" \
+    "        </s:Header>\n" \
+    "        <s:Body>\n" \
+    "                <d:Probe/>\n" \
+    "        </s:Body>\n" \
+    "</s:Envelope>\n"
 
 
 namespace udpradar {
@@ -23,14 +45,18 @@ UdpRadarImp::~UdpRadarImp() {
     stop();
 }
 
-void UdpRadarImp::send(const void *buffer, unsigned int size) {
+void UdpRadarImp::ws_discovery() {
     if (!thread_) {
         return;
     }
+
+    boost::asio::io_service io_service;
+
     std::shared_ptr<boost::asio::ip::udp::socket> socket(
-        new boost::asio::ip::udp::socket(io_service_));
-    boost::asio::socket_base::reuse_address reuse_addr_option(true);
-    boost::asio::socket_base::broadcast broad_cast_option(true);
+        new boost::asio::ip::udp::socket(io_service));
+
+    auto v4_multi_address = boost::asio::ip::address_v4::from_string(
+                multicast_address_.c_str());
 
     boost::system::error_code error;
     socket->open(boost::asio::ip::udp::v4(), error);
@@ -39,25 +65,44 @@ void UdpRadarImp::send(const void *buffer, unsigned int size) {
         return;
     }
 
-    socket->set_option(reuse_addr_option);
+    // TTL
+    socket->set_option(boost::asio::ip::multicast::hops(4));
 
     socket->set_option(
+        boost::asio::ip::multicast::enable_loopback(false));
+
+    socket->set_option(
+        boost::asio::socket_base::reuse_address(true));
+
+    auto v4_listen_address = boost::asio::ip::address_v4::from_string(
+        listen_address_.c_str());
+
+    auto listen_endpoint = boost::asio::ip::udp::endpoint(
+        boost::asio::ip::udp::v4(), port_);
+
+    socket->bind(listen_endpoint);
+/*
+    socket->set_option(
         boost::asio::ip::multicast::join_group(
-            boost::asio::ip::address_v4::from_string(
-                multicast_address_.c_str())));
+            v4_multi_address));
+    */
 
     auto endpoint = boost::asio::ip::udp::endpoint(
-        boost::asio::ip::address_v4::from_string(
-            multicast_address_.c_str()), port_);
+        v4_multi_address, port_);
 
-    std::shared_ptr<unsigned char> data(
-        new unsigned char[size], []( unsigned char *p ) { delete[] p; } );
-
-    socket->async_send_to(boost::asio::buffer(data.get(), size), endpoint,
-                [data, socket] (
+    socket->async_send_to(boost::asio::buffer(
+            XML_DISCOVERY, strlen(XML_DISCOVERY) + 1), endpoint,
+                [socket] (
                     const boost::system::error_code& error,
                     std::size_t transferred) {
+                    if (error) {
+                        printf("Sent Error %d\n", error.value());
+                    } else {
+                        printf("Sent Success\n");
+                    }
                 });
+
+    io_service.run_one();
 }
 
 void UdpRadarImp::start() {
@@ -67,6 +112,7 @@ void UdpRadarImp::start() {
     work_.reset(new boost::asio::io_service::work(io_service_));
     thread_.reset(new boost::thread([this]() {
         io_service_.reset();
+        printf("Receiving thread...\n");
         start_receive();
         io_service_.run();
     }));
@@ -81,36 +127,40 @@ void UdpRadarImp::stop() {
 }
 
 void UdpRadarImp::start_receive() {
-    auto endpoint = boost::asio::ip::udp::endpoint(
-        boost::asio::ip::address_v4::from_string(
-                listen_address_.c_str()), port_);
+    printf("Query reception 0...\n");
+
+    auto v4_listen_address = boost::asio::ip::address_v4::from_string(
+            listen_address_.c_str());
+
+    auto listen_endpoint = boost::asio::ip::udp::endpoint(
+        boost::asio::ip::udp::v4(), port_);
+
+    auto v4_multi_address = boost::asio::ip::address_v4::from_string(
+            multicast_address_.c_str());
 
     std::shared_ptr<boost::asio::ip::udp::socket> socket(
-        new boost::asio::ip::udp::socket(io_service_, endpoint));
+        new boost::asio::ip::udp::socket(io_service_));
 
-    boost::system::error_code error;
-    socket->open(boost::asio::ip::udp::v4(), error);
+    socket->open(listen_endpoint.protocol());
 
-    if (error) {
-        return;
-    }
+    socket->set_option(
+        boost::asio::ip::udp::socket::reuse_address(true));
 
-    boost::asio::socket_base::reuse_address reuse_addr_option(true);
-    socket->set_option(reuse_addr_option);
+    socket->bind(listen_endpoint);
 
     socket->set_option(
         boost::asio::ip::multicast::join_group(
-            boost::asio::ip::address_v4::from_string(
-                multicast_address_.c_str())));
+            v4_multi_address, v4_listen_address));
 
-    std::shared_ptr<array_64> buffer(new array_64());
+    std::shared_ptr<array_2k> buffer(new array_2k());
 
+    printf("Query reception... 2\n");
     receive(socket, buffer);
 }
 
 void UdpRadarImp::receive(
     std::shared_ptr<boost::asio::ip::udp::socket> socket,
-    std::shared_ptr<array_64> buffer
+    std::shared_ptr<array_2k> buffer
 ) {
     std::shared_ptr<boost::asio::ip::udp::endpoint> remote_endpoint(
         new boost::asio::ip::udp::endpoint());
@@ -121,15 +171,32 @@ void UdpRadarImp::receive(
             this, remote_endpoint, socket, buffer
         ] (const boost::system::error_code& error, std::size_t transferred) {
             if (error) {
-                handler_(NULL, 0, error.value());
+                printf("A error here %d\n", error.value());
+                handler_(std::string(), error.value());
             } else {
+                auto data = std::string(
+                    buffer->begin(), buffer->begin() + transferred);
+
+                // once buffer is not referenced receive next information
                 receive(socket, buffer);
 
-                std::stringstream content;
-                content << &(*(buffer.get()));
-                auto data = content.str();
+                // printf("Some action here: %s\n", data.c_str());
+                printf("Some action here: %s\n", remote_endpoint->address().to_string().c_str());
 
-                handler_(data.data(), data.size(), 0);
+                std::size_t tag_start = data.find("<d:XAddrs>");
+
+                if (tag_start == std::string::npos) {
+                    return;
+                }
+
+                std::size_t tag_end = data.find("</d:XAddrs>");
+
+                if (tag_end == std::string::npos) {
+                    return;
+                }
+
+                handler_(
+                    data.substr(tag_start + 10, tag_end - tag_start - 10), 0);
             }
         });
 }

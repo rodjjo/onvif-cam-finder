@@ -6,6 +6,7 @@
 
 #include <memory>
 #include <functional>
+#include <string>
 #include <boost/noncopyable.hpp>
 
 
@@ -13,13 +14,13 @@ namespace udpradar {
 
 
 typedef std::function<void(
-    const void *buffer, unsigned int size, int error_code)> ReceiverHandler;
+    const std::string& device, int error_code)> ReceiverHandler;
 
 
 class UdpRadar {
  public:
     virtual ~UdpRadar();
-    virtual void send(const void *buffer, unsigned int size) = 0;
+    virtual void ws_discovery() = 0;
     virtual void start() = 0;
     virtual void stop() = 0;
 };

@@ -14,7 +14,7 @@
 
 namespace udpradar {
 
-typedef std::array<char, 64000> array_64;
+typedef std::array<char, 65000> array_2k;
 
 class UdpRadarImp: public UdpRadar, public boost::noncopyable {
  public:
@@ -24,7 +24,7 @@ class UdpRadarImp: public UdpRadar, public boost::noncopyable {
         unsigned int port,
         ReceiverHandler handler);
     ~UdpRadarImp();
-    void send(const void *buffer, unsigned int size) override;
+    void ws_discovery() override;
     void start() override;
     void stop() override;
 
@@ -32,7 +32,7 @@ class UdpRadarImp: public UdpRadar, public boost::noncopyable {
     void start_receive();
     void receive(
         std::shared_ptr<boost::asio::ip::udp::socket> socket,
-        std::shared_ptr<array_64> buffer);
+        std::shared_ptr<array_2k> buffer);
 
  private:
     std::string listen_address_;

@@ -6,6 +6,7 @@ project(UdpRadar C CXX)
 
 find_package(Threads)
 find_package(OpenSSL)
+find_package(tinyxml2)
 find_package(Boost
             COMPONENTS
             system
