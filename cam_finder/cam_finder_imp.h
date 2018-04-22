@@ -1,8 +1,8 @@
 /*
  * Copyright (C) 2018 by Rodrigo Antonio de Araujo
  */
-#ifndef UDP_RADAR_UDP_RADAR_IMP_H_
-#define UDP_RADAR_UDP_RADAR_IMP_H_
+#ifndef CAM_FINDER_CAM_FINDER_IMP_H_
+#define CAM_FINDER_CAM_FINDER_IMP_H_
 
 #include <string>
 #include <memory>
@@ -47,4 +47,4 @@ class CamFinderImp: public CamFinder, public boost::noncopyable {
 
 }  // namespace camfinder
 
-#endif  // UDP_RADAR_UDP_RADAR_IMP_H_
+#endif  // CAM_FINDER_CAM_FINDER_IMP_H_

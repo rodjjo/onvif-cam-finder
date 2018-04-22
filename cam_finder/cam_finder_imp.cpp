@@ -3,9 +3,8 @@
  */
 #include <sstream>
 #include <string>
-#include <tinyxml2.h>
 
-#include "cam_finder/udp_radar_imp.h"
+#include "cam_finder/cam_finder_imp.h"
 
 
 #define XML_DISCOVERY  \
