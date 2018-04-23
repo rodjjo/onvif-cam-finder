@@ -96,6 +96,7 @@ void CamFinderImp::start() {
 void CamFinderImp::stop() {
     if (thread_) {
         work_.reset();
+        io_service_.stop();
         thread_->join();
         thread_.reset();
     }

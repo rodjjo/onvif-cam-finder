@@ -9,9 +9,6 @@
 
 
 int main() {
-    printf("%s\n", camfinder::query_stream_info_message
-        ("", "", "admin", "admin").c_str());
-    return 0;
     bool finished = false;
 
     auto finder = camfinder::build(
@@ -36,7 +33,8 @@ int main() {
         boost::this_thread::sleep(boost::posix_time::milliseconds(1));
     }
 
-    boost::this_thread::sleep(boost::posix_time::milliseconds(2000));
+    printf("Finishing...\n");
+    
 
     return 0;
 }
