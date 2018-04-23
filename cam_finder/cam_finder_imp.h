@@ -4,8 +4,10 @@
 #ifndef CAM_FINDER_CAM_FINDER_IMP_H_
 #define CAM_FINDER_CAM_FINDER_IMP_H_
 
-#include <string>
+#include <list>
 #include <memory>
+#include <string>
+#include <functional>
 #include <boost/asio.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/thread.hpp>
@@ -16,6 +18,12 @@ namespace camfinder {
 
 typedef std::array<char, 2048> array_2k;
 
+typedef std::function<void(
+    std::list<std::string>&& profiles,
+    stream_map_t&& streams,
+    int error
+)> query_stream_handler_t;
+
 class CamFinderImp: public CamFinder, public boost::noncopyable {
  public:
     CamFinderImp(
@@ -25,7 +33,7 @@ class CamFinderImp: public CamFinder, public boost::noncopyable {
         ReceiverHandler handler);
     ~CamFinderImp();
     void find_cameras() override;
-    void query_device(
+    void query_profiles(
             const std::string& device_url,
             const std::string& username,
             const std::string& password) override;
@@ -38,6 +46,14 @@ class CamFinderImp: public CamFinder, public boost::noncopyable {
     void receive_discovery(
         std::shared_ptr<boost::asio::ip::udp::socket> socket,
         std::shared_ptr<array_2k> buffer);
+
+    void query_profiles_streams(
+        const std::string& device_url,
+        const std::string& username,
+        const std::string& password,
+        std::list<std::string>&& profiles,
+        stream_map_t&& streams,
+        query_stream_handler_t handler);
 
  private:
     std::string listen_address_;

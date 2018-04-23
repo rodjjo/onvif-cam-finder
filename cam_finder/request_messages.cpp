@@ -240,18 +240,12 @@ void generate_token(
     token.password = sha1_base64(user_data);
 }
 
-std::string query_stream_info_message(
-    const std::string& host,
-    const std::string& path,
+std::string query_profiles_stream_message(
     const std::string& username,
-    const std::string& password
+    const std::string& password,
+    const std::string& profile_token
 ) {
     std::ostringstream data;
-
-    data << "POST " << path << " HTTP/1.0\r\n";
-    data << "Host: " << host << "\r\n";
-    data << "Accept: */*\r\n";
-    data << "Connection: close\r\n\r\n";
 
     token_t token;
     generate_token(username, password, &token);
@@ -260,6 +254,12 @@ std::string query_stream_info_message(
         token.username, token.password, token.nonce, token.created);
 
     return data.str();
+}
+
+std::string query_profiles_message(
+    const std::string& username,
+    const std::string& password) {
+    return std::string();  // TODO(rodrigo): Implementar
 }
 
 const char* get_discovery_message() {

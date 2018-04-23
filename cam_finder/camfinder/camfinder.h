@@ -7,17 +7,19 @@
 #include <memory>
 #include <functional>
 #include <string>
+#include <map>
 #include <list>
 #include <boost/noncopyable.hpp>
 
 
 namespace camfinder {
 
-typedef std::list<std::string> stream_list_t;
+
+typedef std::map<std::string, std::string> stream_map_t;
 
 typedef std::function<void(
     const std::string& device,
-    const stream_list_t& streams,
+    const stream_map_t& streams,
     int error_code)> ReceiverHandler;
 
 
@@ -25,7 +27,7 @@ class CamFinder {
  public:
     virtual ~CamFinder();
     virtual void find_cameras() = 0;
-    virtual void query_device(
+    virtual void query_profiles(
                 const std::string& device_url,
                 const std::string& username,
                 const std::string& password) = 0;

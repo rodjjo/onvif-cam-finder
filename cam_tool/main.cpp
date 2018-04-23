@@ -14,7 +14,7 @@ int main() {
     auto finder = camfinder::build(
             "0.0.0.0", "239.255.255.250", 3702, [&finished] (
                 const std::string& device,
-                const camfinder::stream_list_t&,
+                const camfinder::stream_map_t&,
                 int) {
                     printf("Device: %s\n", device.c_str());
                     finished = true;

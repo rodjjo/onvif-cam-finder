@@ -5,6 +5,8 @@
 #include <string>
 
 #include "cam_finder/cam_finder_imp.h"
+#include "cam_finder/cam_finder_http.h"
+#include "cam_finder/cam_finder_parsers.h"
 #include "cam_finder/request_messages.h"
 
 namespace camfinder {
@@ -119,7 +121,7 @@ void CamFinderImp::start_discovery() {
     socket->open(listen_endpoint.protocol(), error);
 
     if (error) {
-        handler_(std::string(), stream_list_t(), error.value());
+        handler_(std::string(), stream_map_t(), error.value());
     }
 
     socket->set_option(
@@ -149,7 +151,7 @@ void CamFinderImp::receive_discovery(
             this, remote_endpoint, socket, buffer
         ] (const boost::system::error_code& error, std::size_t transferred) {
             if (error) {
-                handler_(std::string(), stream_list_t(), error.value());
+                handler_(std::string(), stream_map_t(), error.value());
             } else {
                 auto data = std::string(
                     buffer->begin(), buffer->begin() + transferred);
@@ -168,7 +170,7 @@ void CamFinderImp::receive_discovery(
                     return;
                 }
 
-                query_device(
+                query_profiles(
                     data.substr(tag_start + 10, tag_end - tag_start - 10),
                     "", "");
             }
@@ -176,15 +178,87 @@ void CamFinderImp::receive_discovery(
 }
 
 
-void CamFinderImp::query_device(
+void CamFinderImp::query_profiles(
                 const std::string& device_url,
                 const std::string& username,
                 const std::string& password
 ) {
-    handler_(device_url, stream_list_t(), 0);
-    // TODO(Rodrigo): query camip profiles
-    // TODO(Rodrigo): for each profile query camip video stream uris
-    // TODO(Rodrigo): notify discovered information
+    std::shared_ptr<Http> http_client(
+        new Http(&io_service_));
+
+    http_client->post(
+        device_url,
+        query_profiles_message(username, password),
+        [this, device_url, username, password, http_client] (
+            const std::string& response,
+            const boost::system::error_code& ec
+        ) {
+            if (ec || response.empty) {
+                handler_(device_url, stream_map_t(), 0);
+            }
+
+            std::list<std::string> profiles(
+                parser::get_profile_tokens(response));
+
+            stream_map_t streams;
+
+            query_profiles_streams(
+                device_url,
+                username,
+                password,
+                std::move(profiles),
+                std::move(streams),
+                [this, device_url] (
+                    std::list<std::string>&& profiles,
+                    stream_map_t&& streams,
+                    int error
+                ) {
+                    handler_(device_url, streams, 0);
+                }
+            )
+        });
+}
+
+void CamFinderImp::query_profiles_streams(
+        const std::string& device_url,
+        const std::string& username,
+        const std::string& password,
+        std::list<std::string>&& profiles,
+        stream_map_t&& streams,
+        query_stream_handler_t handler) {
+    if (profiles.empty()) {
+        handler(std::move(profiles), std::move(streams), 0);
+    }
+
+    auto current_profile = *profiles.begin();
+    profiles.pop_front();
+
+    std::shared_ptr<Http> http_client(
+        new Http(&io_service_));
+
+    http_client->post(
+        device_url,
+        query_profiles_stream_message(username, password, current_profile),
+        [this, device_url, username, password,
+                http_client, handler, current_profile] (
+            const std::string& response,
+            const boost::system::error_code& ec
+        ) {
+            if (!ec) {
+                auto uri = parser::get_stream_uri()
+                if (!uri.empty()) {
+                    streams[current_profile] = uri;
+                }
+            }
+
+            query_profiles_streams(
+                device_url,
+                username,
+                password,
+                std::move(profiles),
+                std::move(streams),
+                handler);
+        });
 }
 
 }  // namespace camfinder
