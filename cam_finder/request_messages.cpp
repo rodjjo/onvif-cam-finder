@@ -16,6 +16,7 @@
 #include "cam_finder/request_messages.h"
 
 
+
 #define XML_DEVICES \
     "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" \
     "<soap:Envelope xmlns:soap=\"http://www.w3.org/2003/05/soap-envelope\"" \
@@ -67,35 +68,6 @@ std::string xml_encode(const std::string& data) {
         }
     }
     return buffer;
-}
-
-
-std::string generate_xml(
-    const std::string& user,
-    const std::string& passwd_hash,
-    const std::string& nonce,
-    const std::string& created
-) {
-    const char *stream_type = "RTP-Unicast";
-    const char *stream_protocol = "UDP";
-    const char *stream_profile = "Profile1";
-
-    char temp[20000];
-
-    memset(temp, 0, sizeof(temp));
-
-    snprintf(
-        temp,
-        sizeof(temp) - 1,
-        XML_DEVICES,
-        user.c_str(),
-        passwd_hash.c_str(),
-        nonce.c_str(),
-        created.c_str(),
-        stream_type,
-        stream_protocol,
-        stream_profile);
-    return temp;
 }
 
 typedef struct {
@@ -240,26 +212,123 @@ void generate_token(
     token.password = sha1_base64(user_data);
 }
 
+
+std::string get_athorization_section(
+    const std::string& username, const std::string& password
+) {
+    if (username.empty()) {
+        return std::string();
+    }
+
+    token_t token;
+    generate_token(username, password, &token);
+    std::stringstream stream;
+
+    stream << "<SOAP-ENV:Header>" << std::endl;
+    stream << "<wsse:Security>" << std::endl;
+    stream << "<wsse:UsernameToken>" << std::endl;
+    stream << "<wsse:Username>";
+    stream << token.username;
+    stream << "</wsse:Username>" << std::endl;
+    stream << "<wsse:Password Type=\"";
+    stream << "http://docs.oasis-open.org/wss/2004/01/";
+    stream << "oasis-200401-wss-username-token-profile-1.0";
+    stream << "#PasswordDigest\">";
+    stream << token.password;
+    stream << "</wsse:Password>" << std::endl;
+    stream << "<wsse:Nonce>";
+    stream << token.nonce;
+    stream << "</wsse:Nonce>" << std::endl;
+    stream << "<wsu:Created>";
+    stream << token.created;  // "2015-07-03T15:03:18.933Z
+    stream << "</wsu:Created>" << std::endl;
+    stream << "</wsse:UsernameToken>" << std::endl;
+    stream << "</wsse:Security>" << std::endl;
+    stream << "</SOAP-ENV:Header>" << std::endl;
+
+    stream.str();
+}
+
+std::string soap_envelop(const std::string& header, const std::string& body) {
+    std::stringstream stream;
+    stream << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl;
+    stream << "<SOAP-ENV:Envelope\"";
+    stream << " xmlns:SOAP-ENV=\"http://www.w3.org/2003/05/soap-envelope\"";
+    stream << " xmlns:SOAP-ENC=\"http://www.w3.org/2003/05/soap-encoding\"";
+    stream << " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"";
+    stream << " xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"";
+    stream << " xmlns:chan=\"http://schemas.microsoft.com/ws/2005/02/duplex\"";
+    stream << " xmlns:wsa5=\"http://www.w3.org/2005/08/addressing\"";
+    stream << " xmlns:c14n=\"http://www.w3.org/2001/10/xml-exc-c14n#\"";
+    stream << " xmlns:wsu=\"http://docs.oasis-open.org/wss/2004/01/\"";
+    stream << "oasis-200401-wss-wssecurity-utility-1.0.xsd\"";
+    stream << " xmlns:xenc=\"http://www.w3.org/2001/04/xmlenc#\"";
+    stream << " xmlns:wsc=\"http://schemas.xmlsoap.org/ws/2005/02/sc\"";
+    stream << " xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\"";
+    stream << " xmlns:wsse=\"http://docs.oasis-open.org/wss/2004/01/\"";
+    stream << "oasis-200401-wss-wssecurity-secext-1.0.xsd\"";
+    stream << " xmlns:xmime5=\"http://www.w3.org/2005/05/xmlmime\"";
+    stream << " xmlns:xmime=\"http://tempuri.org/xmime.xsd\"";
+    stream << " xmlns:xop=\"http://www.w3.org/2004/08/xop/include\"";
+    stream << " xmlns:tt=\"http://www.onvif.org/ver10/schema\"";
+    stream << " xmlns:wsrfbf=\"http://docs.oasis-open.org/wsrf/bf-2\"";
+    stream << " xmlns:wstop=\"http://docs.oasis-open.org/wsn/t-1\"";
+    stream << " xmlns:wsrfr=\"http://docs.oasis-open.org/wsrf/r-2\"";
+    stream << " xmlns:tds=\"http://www.onvif.org/ver10/device/wsdl\"";
+    stream << " xmlns:tev=\"http://www.onvif.org/ver10/events/wsdl\"";
+    stream << " xmlns:wsnt=\"http://docs.oasis-open.org/wsn/b-2\"";
+    stream << " xmlns:tptz=\"http://www.onvif.org/ver20/ptz/wsdl\"";
+    stream << " xmlns:trt=\"http://www.onvif.org/ver10/media/wsdl\"";
+    stream << " xmlns:timg=\"http://www.onvif.org/ver20/imaging/wsdl\"";
+    stream << " xmlns:tmd=\"http://www.onvif.org/ver10/deviceIO/wsdl\"";
+    stream << " xmlns:tns1=\"http://www.onvif.org/ver10/topics\"";
+    stream << " xmlns:ter=\"http://www.onvif.org/ver10/error\"";
+    stream << " xmlns:tnsaxis=\"http://www.axis.com/2009/event/topics\">\n";
+    stream << header;
+    stream << "<SOAP-ENV:Body>" << std::endl;
+    stream << body;
+    stream << "</SOAP-ENV:Body>" << std::endl;
+    stream << "</SOAP-ENV:Envelope>" << std::endl;
+    return stream.str();
+}
+
+
 std::string query_profiles_stream_message(
     const std::string& username,
     const std::string& password,
     const std::string& profile_token
 ) {
-    std::ostringstream data;
+    const char *stream_type = "RTP-Unicast";
+    const char *protocol_type =  "UDP";
 
-    token_t token;
-    generate_token(username, password, &token);
+    std::stringstream stream;
 
-    data << generate_xml(
-        token.username, token.password, token.nonce, token.created);
+    stream << "<trt:GetStreamUri>" << std::endl;
+    stream << "<trt:StreamSetup>" << std::endl;
+    stream << "<tt:Stream>";
+    stream << stream_type;
+    stream << "</tt:Stream>" << std::endl;
+    stream << "<tt:Transport>" << std::endl;
+    stream << "<tt:Protocol>";
+    stream << protocol_type;
+    stream << "</tt:Protocol>" << std::endl;
+    stream << "</Transport>" << std::endl;
+    stream << "</trt:StreamSetup>" << std::endl;
+    stream << "<trt:ProfileToken>" << profile_token;
+    stream << "</trt:ProfileToken>" << std::endl;
+    stream << "</trt:GetStreamUri>" << std::endl;
 
-    return data.str();
+    return soap_envelop(
+        get_athorization_section(username, password),
+        stream.str());
 }
 
 std::string query_profiles_message(
     const std::string& username,
     const std::string& password) {
-    return std::string();  // TODO(rodrigo): Implementar
+    return soap_envelop(
+        get_athorization_section(username, password),
+        "<trt:GetProfiles/>");
 }
 
 const char* get_discovery_message() {
