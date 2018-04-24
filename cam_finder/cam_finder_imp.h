@@ -12,6 +12,7 @@
 #include <boost/noncopyable.hpp>
 #include <boost/thread.hpp>
 #include "cam_finder/camfinder/camfinder.h"
+#include "cam_finder/cam_finder_types.h"
 
 
 namespace camfinder {
@@ -19,8 +20,8 @@ namespace camfinder {
 typedef std::array<char, 2048> array_2k;
 
 typedef std::function<void(
-    std::list<std::string>&& profiles,
-    stream_map_t&& streams,
+    std::shared_ptr<profile_list_t> profiles,
+    std::shared_ptr<stream_list_t> streams,
     int error
 )> query_stream_handler_t;
 
@@ -30,7 +31,7 @@ class CamFinderImp: public CamFinder, public boost::noncopyable {
         const char *listen_address,
         const char *multicast_address,
         unsigned int port,
-        ReceiverHandler handler);
+        device_info_handler_t handler);
     ~CamFinderImp();
     void find_cameras() override;
     void query_profiles(
@@ -51,15 +52,15 @@ class CamFinderImp: public CamFinder, public boost::noncopyable {
         const std::string& device_url,
         const std::string& username,
         const std::string& password,
-        std::list<std::string>&& profiles,
-        stream_map_t&& streams,
+        std::shared_ptr<profile_list_t> profiles,
+        std::shared_ptr<stream_list_t> streams,
         query_stream_handler_t handler);
 
  private:
     std::string listen_address_;
     std::string multicast_address_;
     unsigned int port_;
-    ReceiverHandler handler_;
+    device_info_handler_t handler_;
     boost::asio::io_service io_service_;
     std::shared_ptr<boost::asio::io_service::work> work_;
     std::shared_ptr<boost::thread> thread_;

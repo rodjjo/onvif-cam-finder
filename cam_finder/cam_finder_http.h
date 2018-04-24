@@ -11,21 +11,20 @@
 
 namespace camfinder {
 
+
 typedef std::function<void(
-    const std::string& response, const boost::system::error_code& ec
+    const std::string& response, int error
 )> http_handler_t;
 
-class Http: public boost::noncopyable {
- public:
-    explicit Http(boost::asio::io_service* io_service);
-    virtual ~Http();
-    void post(
-        const std::string& device_url,
-        const std::string& xml,
-        http_handler_t handler);
- private:
-    boost::asio::io_service* io_service_;
-};
+namespace http {
+
+void post(
+    boost::asio::io_service* io_service,
+    const std::string& device_url,
+    const std::string& xml,
+    http_handler_t handler);
+
+}  // namespace http
 
 }  // namespace camfinder
 

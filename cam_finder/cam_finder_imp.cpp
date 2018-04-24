@@ -15,7 +15,7 @@ CamFinderImp::CamFinderImp(
     const char *listen_address,
     const char *multicast_address,
     unsigned int port,
-    ReceiverHandler handler
+    device_info_handler_t handler
 ): listen_address_(listen_address),
    multicast_address_(multicast_address),
    port_(port),
@@ -121,7 +121,7 @@ void CamFinderImp::start_discovery() {
     socket->open(listen_endpoint.protocol(), error);
 
     if (error) {
-        handler_(std::string(), stream_map_t(), error.value());
+        handler_(std::string(), stream_list_t(), error.value());
     }
 
     socket->set_option(
@@ -151,7 +151,7 @@ void CamFinderImp::receive_discovery(
             this, remote_endpoint, socket, buffer
         ] (const boost::system::error_code& error, std::size_t transferred) {
             if (error) {
-                handler_(std::string(), stream_map_t(), error.value());
+                handler_(std::string(), stream_list_t(), error.value());
             } else {
                 auto data = std::string(
                     buffer->begin(), buffer->begin() + transferred);
@@ -179,43 +179,40 @@ void CamFinderImp::receive_discovery(
 
 
 void CamFinderImp::query_profiles(
-                const std::string& device_url,
-                const std::string& username,
-                const std::string& password
+    const std::string& device_url,
+    const std::string& username,
+    const std::string& password
 ) {
-    std::shared_ptr<Http> http_client(
-        new Http(&io_service_));
-
-    http_client->post(
+    http::post(
+        &io_service_,
         device_url,
         query_profiles_message(username, password),
-        [this, device_url, username, password, http_client] (
+        [this, device_url, username, password] (
             const std::string& response,
-            const boost::system::error_code& ec
+            int ec
         ) {
-            if (ec || response.empty) {
-                handler_(device_url, stream_map_t(), 0);
+            if (ec || response.empty()) {
+                handler_(device_url, stream_list_t(), 0);
             }
 
-            std::list<std::string> profiles(
-                parser::get_profile_tokens(response));
+            std::shared_ptr<profile_list_t> profiles(
+                new profile_list_t(std::move(parser::get_profiles(response))));
 
-            stream_map_t streams;
+            std::shared_ptr<stream_list_t> streams(new stream_list_t());
 
             query_profiles_streams(
                 device_url,
                 username,
                 password,
-                std::move(profiles),
-                std::move(streams),
+                profiles,
+                streams,
                 [this, device_url] (
-                    std::list<std::string>&& profiles,
-                    stream_map_t&& streams,
+                    std::shared_ptr<profile_list_t> profiles,
+                    std::shared_ptr<stream_list_t> streams,
                     int error
                 ) {
-                    handler_(device_url, streams, 0);
-                }
-            )
+                    handler_(device_url, *streams.get(), 0);
+                });
         });
 }
 
@@ -223,31 +220,31 @@ void CamFinderImp::query_profiles_streams(
         const std::string& device_url,
         const std::string& username,
         const std::string& password,
-        std::list<std::string>&& profiles,
-        stream_map_t&& streams,
+        std::shared_ptr<profile_list_t> profiles,
+        std::shared_ptr<stream_list_t> streams,
         query_stream_handler_t handler) {
-    if (profiles.empty()) {
-        handler(std::move(profiles), std::move(streams), 0);
+    if (profiles->empty()) {
+        handler(profiles, streams, 0);
     }
 
-    auto current_profile = *profiles.begin();
-    profiles.pop_front();
+    auto current_profile = *profiles->begin();
+    profiles->pop_front();
 
-    std::shared_ptr<Http> http_client(
-        new Http(&io_service_));
-
-    http_client->post(
+    http::post(
+        &io_service_,
         device_url,
-        query_profiles_stream_message(username, password, current_profile),
+        query_profiles_stream_message(
+            username, password, current_profile.token),
         [this, device_url, username, password,
-                http_client, handler, current_profile] (
+                handler, current_profile, streams, profiles] (
             const std::string& response,
-            const boost::system::error_code& ec
+            int ec
         ) {
             if (!ec) {
-                auto uri = parser::get_stream_uri()
-                if (!uri.empty()) {
-                    streams[current_profile] = uri;
+                stream_info_t stream_info = parser::get_stream_info(
+                        current_profile.token, current_profile.name, response);
+                if (!stream_info.stream_uri.empty()) {
+                    streams->push_back(stream_info);
                 }
             }
 
@@ -255,8 +252,8 @@ void CamFinderImp::query_profiles_streams(
                 device_url,
                 username,
                 password,
-                std::move(profiles),
-                std::move(streams),
+                profiles,
+                streams,
                 handler);
         });
 }

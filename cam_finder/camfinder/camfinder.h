@@ -7,7 +7,6 @@
 #include <memory>
 #include <functional>
 #include <string>
-#include <map>
 #include <list>
 #include <boost/noncopyable.hpp>
 
@@ -15,12 +14,21 @@
 namespace camfinder {
 
 
-typedef std::map<std::string, std::string> stream_map_t;
+typedef struct {
+    std::string profile_token;
+    std::string profile_name;
+    std::string stream_uri;
+    int width;
+    int height;
+    int fps;
+} stream_info_t;
+
+typedef std::list<stream_info_t> stream_list_t;
 
 typedef std::function<void(
     const std::string& device,
-    const stream_map_t& streams,
-    int error_code)> ReceiverHandler;
+    const stream_list_t& streams,
+    int error_code)> device_info_handler_t;
 
 
 class CamFinder {
@@ -40,7 +48,7 @@ std::shared_ptr<CamFinder> build(
     const char *listen_address,
     const char *multicast_address,
     unsigned int port,
-    ReceiverHandler handler);
+    device_info_handler_t handler);
 
 
 std::string query_stream_info_message(

@@ -6,12 +6,19 @@
 
 #include <string>
 #include <list>
+#include "cam_finder/camfinder/camfinder.h"
+#include "cam_finder/cam_finder_types.h"
+
 
 namespace camfinder {
 namespace parser {
 
-std::list<std::string> get_profile_tokens(const std::string& xml);
-std::string get_stream_uri(const std::string& xml);
+profile_list_t get_profiles(const std::string& xml);
+
+stream_info_t get_stream_info(
+    const std::string& profile_token,
+    const std::string& profile_name,
+    const std::string& xml);
 
 }  // namespace parser
 }  // namespace camfinder

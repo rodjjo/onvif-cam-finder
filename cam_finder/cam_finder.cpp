@@ -13,7 +13,7 @@ std::shared_ptr<CamFinder> build(
     const char *listen_address,
     const char *multicast_address,
     unsigned int port,
-    ReceiverHandler handler
+    device_info_handler_t handler
 ) {
     return std::shared_ptr<CamFinder>(
         new CamFinderImp(
