@@ -15,43 +15,6 @@
 
 #include "cam_finder/request_messages.h"
 
-
-
-#define XML_DEVICES \
-    "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" \
-    "<soap:Envelope xmlns:soap=\"http://www.w3.org/2003/05/soap-envelope\"" \
-    " xmlns:trt=\"http://www.onvif.org/ver10/media/wsdl\"" \
-    " xmlns:tt=\"http://www.onvif.org/ver10/schema\">\n" \
-    "    <s:Header>\n" \
-    "        <Security s:mustUnderstand=\"1\" " \
-    "xmlns=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-" \
-    "wssecurity-secext-1.0.xsd\">\n" \
-    "        <UsernameToken>\n" \
-    "        <Username>%s</Username>\n" \
-    "        <Password Type=\"http://docs.oasis-open.org/wss/2004/01/" \
-    "oasis-200401-wss-username-token-profile-1.0#PasswordDigest\">%s" \
-    "</Password>\n" \
-    "        <Nonce EncodingType=\"http://docs.oasis-open.org/wss/2004/" \
-    "01/oasis-200401-wss-soap-message-security-1.0#Base64Binary\">%s" \
-    "</Nonce>\n" \
-    "        <Created xmlns=\"http://docs.oasis-open.org/wss/2004/01/" \
-    "oasis-200401-wss-wssecurity-utility-1.0.xsd\">%s</Created>\n" \
-    "        </UsernameToken>\n" \
-    "        </Security>\n" \
-    "    </s:Header>\n" \
-    "    <soap:Body>\n" \
-    "        <trt:GetStreamUri>\n" \
-    "            <trt:StreamSetup>\n" \
-    "                <tt:Stream>%s</tt:Stream>\n" \
-    "                <tt:Transport>\n" \
-    "                    <tt:Protocol>%s</tt:Protocol>\n" \
-    "                </tt:Transport>\n" \
-    "            </trt:StreamSetup>\n" \
-    "            <trt:ProfileToken>%s</trt:ProfileToken>\n" \
-    "        </trt:GetStreamUri>\n" \
-    "    </soap:Body>\n" \
-    "</soap:Envelope>\n"
-
 namespace camfinder {
 
 std::string xml_encode(const std::string& data) {
