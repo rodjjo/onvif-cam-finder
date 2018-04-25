@@ -117,6 +117,7 @@ void CamFinderImp::start_discovery() {
 
     if (error) {
         handler_(std::string(), stream_list_t(), error.value());
+        return;
     }
 
     socket->set_option(
