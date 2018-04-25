@@ -50,13 +50,6 @@ std::shared_ptr<CamFinder> build(
     unsigned int port,
     device_info_handler_t handler);
 
-
-std::string query_stream_info_message(
-    const std::string& host,
-    const std::string& path,
-    const std::string& username,
-    const std::string& password);
-
 }  // namespace camfinder
 
 #endif  // CAM_FINDER_CAMFINDER_CAMFINDER_H_
