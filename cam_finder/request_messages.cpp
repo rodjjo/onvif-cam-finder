@@ -46,7 +46,7 @@ std::string utc_date() {
     namespace pt = boost::posix_time;
 
     static char const* const date_format = "%Y-%m-%d";
-    static char const* const time_format = "%H:%M:%S";
+    static char const* const time_format = "%H:%M:%S.000";
 
     auto today = bg::day_clock::universal_day();
 
@@ -95,7 +95,7 @@ void raw_sha1_of_vector(const byte_vector_t& data, raw_hash_t *result) {
     boost::uuids::detail::sha1 s;
 
     s.process_bytes(&data[0], data.size());
-    unsigned int digest[5];
+    unsigned int digest[5] = { 0, };
     s.get_digest(digest);
 
     for (int i = 0; i < 5; ++i) {
@@ -135,9 +135,7 @@ std::string sha1_of_string(const std::string& data) {
 }
 
 std::string create_nonce() {
-    // auto uuid = boost::uuids::random_generator()();
-    printf("base644 of admin = %s", encode_base64("admin", 5).c_str());
-    return "noncecreated";
+    return boost::uuids::to_string(boost::uuids::random_generator()());
 }
 
 
@@ -146,6 +144,7 @@ void generate_token(
     const std::string& password,
     token_t * ptoken
 ) {
+    printf("Generating password\n");
     token_t &token = *ptoken;
     token.username = xml_encode(username);
     token.created = utc_date();
@@ -184,6 +183,7 @@ std::string get_athorization_section(
     }
 
     token_t token;
+
     generate_token(username, password, &token);
     std::stringstream stream;
 
@@ -209,7 +209,7 @@ std::string get_athorization_section(
     stream << "</wsse:Security>" << std::endl;
     stream << "</SOAP-ENV:Header>" << std::endl;
 
-    stream.str();
+    return stream.str();
 }
 
 std::string soap_envelop(const std::string& header, const std::string& body) {

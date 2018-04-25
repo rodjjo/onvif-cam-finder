@@ -32,6 +32,7 @@ int main() {
 
     printf("Sending...\n");
     finder->search();
+
     printf("Waiting reception...\n");
 
     while (!finished) {
