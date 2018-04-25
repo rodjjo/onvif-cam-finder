@@ -183,6 +183,7 @@ void CamFinderImp::query_profiles(
     const std::string& username,
     const std::string& password
 ) {
+    printf("querying profiles...\n");
     http::post(
         &io_service_,
         device_url,
@@ -192,13 +193,17 @@ void CamFinderImp::query_profiles(
             int ec
         ) {
             if (ec || response.empty()) {
+                printf("error getting profiles %d...\n", ec);
                 handler_(device_url, stream_list_t(), 0);
+                return;
             }
 
             std::shared_ptr<profile_list_t> profiles(
-                new profile_list_t(std::move(parser::get_profiles(response))));
+                new profile_list_t(parser::get_profiles(response)));
 
             std::shared_ptr<stream_list_t> streams(new stream_list_t());
+
+            printf("Finding streams ...\n");
 
             query_profiles_streams(
                 device_url,
@@ -225,6 +230,7 @@ void CamFinderImp::query_profiles_streams(
         query_stream_handler_t handler) {
     if (profiles->empty()) {
         handler(profiles, streams, 0);
+        return;
     }
 
     auto current_profile = *profiles->begin();

@@ -35,8 +35,20 @@ typedef std::function<void(
 void resolve(
     boost::asio::io_service* io_service,
     const std::string& server,
-    resolver_handler_t handler) {
-  boost::asio::ip::tcp::resolver::query query(server, "http");
+    resolver_handler_t handler
+) {
+    const char *address = server.c_str();
+    const char *separator = strstr(address, ":");
+    const char *service =  separator ? separator + 1 : "http";
+    std::string host;
+    if (separator) {
+        host = std::string(address, separator);
+    } else {
+        host = server;
+    }
+
+    boost::asio::ip::tcp::resolver::query query(host, service);
+
     std::shared_ptr<boost::asio::ip::tcp::resolver> resolver(
         new boost::asio::ip::tcp::resolver(*io_service));
 
@@ -101,6 +113,7 @@ std::string parse_http_response(std::stringstream* stream) {
     data >> status_code;
 
     if (status_code < 200 || status_code >= 300) {
+        printf("Http status code %d\n", status_code);
         return std::string();
     }
 
@@ -108,6 +121,7 @@ std::string parse_http_response(std::stringstream* stream) {
     std::getline(data, line);
 
     if (!data.good() || http_version.substr(0, 5) != "HTTP/") {
+        printf("Wrong http version %s\n", http_version.c_str());
         return std::string();
     }
 
@@ -166,7 +180,7 @@ bool split_url(
 
     const char *p2 = strstr(p1 + 7, "/");
     if (p2) {
-        *server = std::string(p1 + 7, p2 - 1);
+        *server = std::string(p1 + 7, p2);
         *path = p2;
     } else {
         *server = p1;
@@ -181,35 +195,39 @@ void post(
     const std::string& device_url,
     const std::string& xml,
     http_handler_t handler) {
-
+    printf("http_post called..\n");
     std::string server;
     std::string path;
 
     if (!split_url(device_url, &server, &path)) {
+        printf("Unknow url..\n");
         handler("", 0);
         return;
     }
 
     buffer_t request(compose_request(server, path, xml));
 
+    printf("resolving %s..\n", server.c_str());
     resolve(io_service, server, [io_service, request, handler] (
         const boost::system::error_code& error,
         boost::asio::ip::tcp::resolver::iterator iterator
     ) {
         if (error) {
+            printf("resolver error..\n");
             handler("", error.value());
             return;
         }
-
+        printf("sending http request...\n");
         send_request(io_service, iterator, request, [handler] (
             int error,
             tcp_socket_t socket
         ) {
             if (error) {
+                printf("send request error..\n");
                 handler("", error);
                 return;
             }
-
+            printf("getting http response...\n");
             std::shared_ptr<boost::asio::streambuf> buffer(
                 new boost::asio::streambuf());
             std::shared_ptr<std::stringstream> data(
@@ -220,10 +238,12 @@ void post(
                 const std::string& response
             ) {
                 if (error) {
+                    printf("receive response error..\n");
                     handler("", error);
                     return;
                 }
 
+                printf("http success...\n");
                 handler(response, 0);
             });
         });

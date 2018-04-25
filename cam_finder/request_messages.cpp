@@ -252,7 +252,7 @@ std::string get_athorization_section(
 std::string soap_envelop(const std::string& header, const std::string& body) {
     std::stringstream stream;
     stream << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl;
-    stream << "<SOAP-ENV:Envelope\"";
+    stream << "<SOAP-ENV:Envelope";
     stream << " xmlns:SOAP-ENV=\"http://www.w3.org/2003/05/soap-envelope\"";
     stream << " xmlns:SOAP-ENC=\"http://www.w3.org/2003/05/soap-encoding\"";
     stream << " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"";
@@ -260,12 +260,12 @@ std::string soap_envelop(const std::string& header, const std::string& body) {
     stream << " xmlns:chan=\"http://schemas.microsoft.com/ws/2005/02/duplex\"";
     stream << " xmlns:wsa5=\"http://www.w3.org/2005/08/addressing\"";
     stream << " xmlns:c14n=\"http://www.w3.org/2001/10/xml-exc-c14n#\"";
-    stream << " xmlns:wsu=\"http://docs.oasis-open.org/wss/2004/01/\"";
+    stream << " xmlns:wsu=\"http://docs.oasis-open.org/wss/2004/01/";
     stream << "oasis-200401-wss-wssecurity-utility-1.0.xsd\"";
     stream << " xmlns:xenc=\"http://www.w3.org/2001/04/xmlenc#\"";
     stream << " xmlns:wsc=\"http://schemas.xmlsoap.org/ws/2005/02/sc\"";
     stream << " xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\"";
-    stream << " xmlns:wsse=\"http://docs.oasis-open.org/wss/2004/01/\"";
+    stream << " xmlns:wsse=\"http://docs.oasis-open.org/wss/2004/01/";
     stream << "oasis-200401-wss-wssecurity-secext-1.0.xsd\"";
     stream << " xmlns:xmime5=\"http://www.w3.org/2005/05/xmlmime\"";
     stream << " xmlns:xmime=\"http://tempuri.org/xmime.xsd\"";
@@ -328,7 +328,7 @@ std::string query_profiles_message(
     const std::string& password) {
     return soap_envelop(
         get_athorization_section(username, password),
-        "<trt:GetProfiles/>");
+        "<trt:GetProfiles></trt:GetProfiles>\n");
 }
 
 const char* get_discovery_message() {
