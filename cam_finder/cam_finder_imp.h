@@ -43,7 +43,7 @@ class CamFinderImp: public CamFinder, public boost::noncopyable {
     void stop() override;
 
  private:
-    void start_discovery();
+    void discovery();
     void receive_discovery(
         std::shared_ptr<boost::asio::ip::udp::socket> socket,
         std::shared_ptr<array_2k> buffer);

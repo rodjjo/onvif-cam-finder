@@ -85,7 +85,7 @@ void CamFinderImp::start() {
     work_.reset(new boost::asio::io_service::work(io_service_));
     thread_.reset(new boost::thread([this]() {
         io_service_.reset();
-        start_discovery();
+        discovery();
         io_service_.run();
     }));
 }
@@ -99,7 +99,7 @@ void CamFinderImp::stop() {
     }
 }
 
-void CamFinderImp::start_discovery() {
+void CamFinderImp::discovery() {
     auto v4_listen_address = boost::asio::ip::address_v4::from_string(
             listen_address_.c_str());
 
