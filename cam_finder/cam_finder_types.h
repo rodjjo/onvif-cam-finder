@@ -14,6 +14,9 @@ namespace camfinder {
 typedef struct {
     std::string name;
     std::string token;
+    std::string width;
+    std::string height;
+    std::string fps;
 } profile_t;
 
 typedef std::list<profile_t> profile_list_t;

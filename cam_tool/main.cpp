@@ -14,9 +14,14 @@ int main() {
     auto finder = camfinder::build(
             "0.0.0.0", "239.255.255.250", 3702, [&finished] (
                 const std::string& device,
-                const camfinder::stream_list_t&,
+                const camfinder::stream_list_t& streams,
                 int) {
                     printf("Device: %s\n", device.c_str());
+                    for (const auto & s : streams) {
+                        printf("profile %s: %s\n\tResolution: %sx%s @ %sfps\n",
+                            s.profile_name.c_str(), s.stream_uri.c_str(),
+                            s.width.c_str(), s.height.c_str(), s.fps.c_str());
+                    }
                     finished = true;
                 });
 

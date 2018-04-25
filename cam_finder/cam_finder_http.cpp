@@ -113,7 +113,6 @@ std::string parse_http_response(std::stringstream* stream) {
     data >> status_code;
 
     if (status_code < 200 || status_code >= 300) {
-        printf("Http status code %d\n", status_code);
         return std::string();
     }
 
@@ -121,7 +120,6 @@ std::string parse_http_response(std::stringstream* stream) {
     std::getline(data, line);
 
     if (!data.good() || http_version.substr(0, 5) != "HTTP/") {
-        printf("Wrong http version %s\n", http_version.c_str());
         return std::string();
     }
 
@@ -195,39 +193,34 @@ void post(
     const std::string& device_url,
     const std::string& xml,
     http_handler_t handler) {
-    printf("http_post called..\n");
     std::string server;
     std::string path;
 
     if (!split_url(device_url, &server, &path)) {
-        printf("Unknow url..\n");
         handler("", 0);
         return;
     }
 
     buffer_t request(compose_request(server, path, xml));
 
-    printf("resolving %s..\n", server.c_str());
     resolve(io_service, server, [io_service, request, handler] (
         const boost::system::error_code& error,
         boost::asio::ip::tcp::resolver::iterator iterator
     ) {
         if (error) {
-            printf("resolver error..\n");
             handler("", error.value());
             return;
         }
-        printf("sending http request...\n");
+
         send_request(io_service, iterator, request, [handler] (
             int error,
             tcp_socket_t socket
         ) {
             if (error) {
-                printf("send request error..\n");
                 handler("", error);
                 return;
             }
-            printf("getting http response...\n");
+
             std::shared_ptr<boost::asio::streambuf> buffer(
                 new boost::asio::streambuf());
             std::shared_ptr<std::stringstream> data(
@@ -238,12 +231,10 @@ void post(
                 const std::string& response
             ) {
                 if (error) {
-                    printf("receive response error..\n");
                     handler("", error);
                     return;
                 }
 
-                printf("http success...\n");
                 handler(response, 0);
             });
         });

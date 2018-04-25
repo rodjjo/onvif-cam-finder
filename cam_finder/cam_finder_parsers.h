@@ -16,9 +16,18 @@ namespace parser {
 profile_list_t get_profiles(const std::string& xml);
 
 stream_info_t get_stream_info(
-    const std::string& profile_token,
-    const std::string& profile_name,
+    const profile_t& profile,
     const std::string& xml);
+
+std::string parser_first(
+    const char* data,
+    const char* open_tag,
+    const char *close_tag);
+
+std::list<std::string> parser_all(
+    const char* data,
+    const char* open_tag,
+    const char *close_tag);
 
 }  // namespace parser
 }  // namespace camfinder

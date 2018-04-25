@@ -18,9 +18,9 @@ typedef struct {
     std::string profile_token;
     std::string profile_name;
     std::string stream_uri;
-    int width;
-    int height;
-    int fps;
+    std::string width;
+    std::string height;
+    std::string fps;
 } stream_info_t;
 
 typedef std::list<stream_info_t> stream_list_t;

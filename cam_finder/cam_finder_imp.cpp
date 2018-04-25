@@ -73,11 +73,6 @@ void CamFinderImp::find_cameras() {
                 [socket] (
                     const boost::system::error_code& error,
                     std::size_t transferred) {
-                    if (error) {
-                        printf("Sent Error %d\n", error.value());
-                    } else {
-                        printf("Sent Success\n");
-                    }
                 });
 
     io_service.run_one();
@@ -183,7 +178,6 @@ void CamFinderImp::query_profiles(
     const std::string& username,
     const std::string& password
 ) {
-    printf("querying profiles...\n");
     http::post(
         &io_service_,
         device_url,
@@ -193,7 +187,6 @@ void CamFinderImp::query_profiles(
             int ec
         ) {
             if (ec || response.empty()) {
-                printf("error getting profiles %d...\n", ec);
                 handler_(device_url, stream_list_t(), 0);
                 return;
             }
@@ -202,8 +195,6 @@ void CamFinderImp::query_profiles(
                 new profile_list_t(parser::get_profiles(response)));
 
             std::shared_ptr<stream_list_t> streams(new stream_list_t());
-
-            printf("Finding streams ...\n");
 
             query_profiles_streams(
                 device_url,
@@ -248,7 +239,7 @@ void CamFinderImp::query_profiles_streams(
         ) {
             if (!ec) {
                 stream_info_t stream_info = parser::get_stream_info(
-                        current_profile.token, current_profile.name, response);
+                        current_profile, response);
                 if (!stream_info.stream_uri.empty()) {
                     streams->push_back(stream_info);
                 }

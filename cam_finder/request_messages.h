@@ -17,7 +17,6 @@ std::string query_profiles_stream_message(
     const std::string& password,
     const std::string& profile_token);
 
-
 const char* get_discovery_message();
 
 }
