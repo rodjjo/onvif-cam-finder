@@ -33,7 +33,7 @@ class CamFinderImp: public CamFinder, public boost::noncopyable {
         unsigned int port,
         device_info_handler_t handler);
     ~CamFinderImp();
-    void find_cameras() override;
+    void search() override;
     void query_profiles(
             const std::string& device_url,
             const std::string& username,

@@ -26,7 +26,7 @@ CamFinderImp::~CamFinderImp() {
     stop();
 }
 
-void CamFinderImp::find_cameras() {
+void CamFinderImp::search() {
     if (!thread_) {
         return;
     }

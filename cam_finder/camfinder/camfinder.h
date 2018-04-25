@@ -34,7 +34,7 @@ typedef std::function<void(
 class CamFinder {
  public:
     virtual ~CamFinder();
-    virtual void find_cameras() = 0;
+    virtual void search() = 0;
     virtual void query_profiles(
                 const std::string& device_url,
                 const std::string& username,
